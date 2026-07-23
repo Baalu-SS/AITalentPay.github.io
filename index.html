@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract Pay Calculator | Day Rate to Net Weekly Pay</title>
+  <meta name="description" content="Convert fixed term contract salary to day rate, calculate AI Talent payroll deductions, and see your net weekly take-home pay after Australian tax.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+       CSS RESET & BASE
+    ═══════════════════════════════════════════ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #06080f;
+      --bg-secondary: #0d1117;
+      --bg-card: rgba(13, 17, 23, 0.7);
+      --bg-card-hover: rgba(20, 27, 40, 0.85);
+      --bg-input: rgba(15, 22, 36, 0.9);
+
+      --accent-cyan: #00d4ff;
+      --accent-cyan-dim: rgba(0, 212, 255, 0.15);
+      --accent-purple: #7c4dff;
+      --accent-purple-dim: rgba(124, 77, 255, 0.15);
+      --accent-green: #00e676;
+      --accent-green-dim: rgba(0, 230, 118, 0.12);
+      --accent-amber: #ffa726;
+      --accent-amber-dim: rgba(255, 167, 38, 0.12);
+      --accent-red: #ff5252;
+      --accent-red-dim: rgba(255, 82, 82, 0.12);
+
+      --text-primary: #e8eaf6;
+      --text-secondary: #8892b0;
+      --text-muted: #5c6a82;
+
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-medium: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(0, 212, 255, 0.25);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+
+      --shadow-glow-cyan: 0 0 30px rgba(0, 212, 255, 0.1);
+      --shadow-glow-purple: 0 0 30px rgba(124, 77, 255, 0.1);
+      --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATED BACKGROUND
+    ═══════════════════════════════════════════ */
+    .bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0, 212, 255, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 30%, rgba(124, 77, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse 70% 40% at 50% 90%, rgba(0, 230, 118, 0.03) 0%, transparent 50%),
+        linear-gradient(180deg, #06080f 0%, #0a0e1a 40%, #0d1025 70%, #06080f 100%);
+    }
+
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    /* ═══════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════ */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ═══════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════ */
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--accent-cyan-dim);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto;
+      line-height: 1.7;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    /* ═══════════════════════════════════════════
+       INPUT SECTION
+    ═══════════════════════════════════════════ */
+    .input-section {
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      box-shadow: var(--shadow-card);
+      transition: border-color var(--transition-fast);
+    }
+
+    .card:hover {
+      border-color: var(--border-medium);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .tab:hover {
+      color: var(--text-primary);
+    }
+
+    .tab.active {
+      background: rgba(0, 212, 255, 0.12);
+      color: var(--accent-cyan);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.08);
+    }
+
+    .tab-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    /* Tab Content */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 16px;
+      color: var(--text-muted);
+      font-size: 16px;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 16px;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 14px 16px 14px 36px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-medium);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 600;
+      outline: none;
+      transition: all var(--transition-fast);
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.12);
+    }
+
+    input.has-suffix {
+      padding-right: 44px;
+    }
+
+    .btn-calculate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--accent-cyan), #0099cc);
+      border: none;
+      border-radius: var(--radius-md);
+      color: #fff;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-calculate::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .btn-calculate:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-calculate:hover::before {
+      left: 100%;
+    }
+
+    .btn-calculate:active {
+      transform: translateY(0);
+    }
+
+    .btn-calculate svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESULTS SECTION
+    ═══════════════════════════════════════════ */
+    .results-section {
+      display: none;
+      margin-bottom: 48px;
+    }
+
+    .results-section.visible {
+      display: block;
+      animation: fadeInUp 0.5s ease-out;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-title .icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      font-size: 18px;
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 28px;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: all var(--transition-smooth);
+    }
+
+    .result-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .result-card.company-card {
+      border-top: 3px solid var(--accent-cyan);
+    }
+
+    .result-card.aitalent-card {
+      border-top: 3px solid var(--accent-purple);
+    }
+
+    .result-card-header {
+      padding: 24px 28px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .company-card .card-icon {
+      background: var(--accent-cyan-dim);
+      color: var(--accent-cyan);
+    }
+
+    .aitalent-card .card-icon {
+      background: var(--accent-purple-dim);
+      color: var(--accent-purple);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .card-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .result-card-body {
+      padding: 0 28px 28px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .result-row:last-child {
+      border-bottom: none;
+    }
+
+    .result-label {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .result-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result-row.highlight {
+      background: rgba(0, 212, 255, 0.06);
+      margin: 0 -28px;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      border-bottom: none;
+    }
+
+    .result-row.highlight .result-label {
+      color: var(--accent-cyan);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .result-row.highlight .result-value {
+      font-size: 20px;
+      color: var(--accent-cyan);
+    }
+
+    .result-row.highlight-purple {
+      background: rgba(124, 77, 255, 0.06);
+      margin: 0 -28px;
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      border-bottom: none;
+    }
+
+    .result-row.highlight-purple .result-label {
+      color: var(--accent-purple);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .result-row.highlight-purple .result-value {
+      font-size: 20px;
+      color: var(--accent-purple);
+    }
+
+    /* Gap / Difference Card */
+    .gap-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 82, 82, 0.2);
+      border-radius: var(--radius-xl);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-card);
+      margin-bottom: 24px;
+    }
+
+    .gap-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-red);
+      margin-bottom: 16px;
+    }
+
+    .gap-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .gap-item {
+      background: var(--accent-red-dim);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    .gap-item-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .gap-item-value {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--accent-red);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ═══════════════════════════════════════════
+       PAY MATRIX TABLE
+    ═══════════════════════════════════════════ */
+    .table-section {
+      margin-bottom: 80px;
+      animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .table-header-text h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .table-header-text p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .table-wrapper {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    thead th {
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: rgba(0, 0, 0, 0.3);
+      border-bottom: 1px solid var(--border-medium);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody tr {
+      transition: background var(--transition-fast);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    tbody tr.highlighted {
+      background: rgba(0, 212, 255, 0.08);
+      box-shadow: inset 3px 0 0 var(--accent-cyan);
+    }
+
+    tbody tr.highlighted td {
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    tbody td {
+      padding: 13px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    tbody td:first-child {
+      font-weight: 700;
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .footer {
+      text-align: center;
+      padding: 32px 0 48px;
+      color: var(--text-muted);
+      font-size: 13px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .footer a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+
+    /* ═══════════════════════════════════════════
+       INFO CALLOUT
+    ═══════════════════════════════════════════ */
+    .info-callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--accent-amber-dim);
+      border: 1px solid rgba(255, 167, 38, 0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .info-callout .callout-icon {
+      color: var(--accent-amber);
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .info-callout strong {
+      color: var(--accent-amber);
+    }
+
+    /* ═══════════════════════════════════════════
+       ANIMATIONS
+    ═══════════════════════════════════════════ */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.2); }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.5s ease-out both;
+    }
+
+    .animate-in-delay-1 { animation-delay: 0.1s; }
+    .animate-in-delay-2 { animation-delay: 0.2s; }
+    .animate-in-delay-3 { animation-delay: 0.3s; }
+
+    /* ═══════════════════════════════════════════
+       SETTINGS ROW
+    ═══════════════════════════════════════════ */
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: var(--radius-md);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .settings-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .setting-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .setting-input {
+      width: 80px;
+      padding: 8px 12px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color var(--transition-fast);
+      -moz-appearance: textfield;
+    }
+
+    .setting-input::-webkit-outer-spin-button,
+    .setting-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .setting-input:focus {
+      border-color: var(--accent-cyan);
+    }
+
+    .setting-unit {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .hero {
+        padding: 40px 0 24px;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .result-card-body {
+        padding: 0 20px 20px;
+      }
+
+      .result-card-header {
+        padding: 20px 20px 12px;
+      }
+
+      .result-row.highlight,
+      .result-row.highlight-purple {
+        margin: 0 -20px;
+        padding: 12px 20px;
+      }
+
+      .gap-card {
+        padding: 20px;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab {
+        text-align: center;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* Tooltip styles */
+    .tooltip-trigger {
+      position: relative;
+      cursor: help;
+      border-bottom: 1px dashed var(--text-muted);
+    }
+
+    .tooltip-trigger:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 8px 12px;
+      background: #1a1f2e;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-primary);
+      white-space: nowrap;
+      z-index: 10;
+      margin-bottom: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    }
+
+    /* Quick summary stats */
+    .quick-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      transition: all var(--transition-fast);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-medium);
+      transform: translateY(-2px);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.cyan { color: var(--accent-cyan); }
+    .stat-value.purple { color: var(--accent-purple); }
+    .stat-value.green { color: var(--accent-green); }
+    .stat-value.red { color: var(--accent-red); }
+    .stat-value.amber { color: var(--accent-amber); }
+
+    .stat-note {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+
+  <div class="container">
+    <!-- ═══ HERO ═══ -->
+    <header class="hero">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Australian Contract Pay Calculator
+      </div>
+      <h1>Fixed Term Contract<br>to <span class="gradient-text">Net Weekly Pay</span></h1>
+      <p>Enter your fixed-term contract salary or day rate to see what you'll actually take home each week through your payroll company after tax.</p>
+    </header>
+
+    <!-- ═══ INPUT ═══ -->
+    <section class="input-section">
+      <div class="card">
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab active" id="tab-ftc" onclick="switchTab('ftc')">
+            <span class="tab-icon">📋</span>Fixed Term Contract
+          </button>
+          <button class="tab" id="tab-dayrate" onclick="switchTab('dayrate')">
+            <span class="tab-icon">📊</span>Day Rate
+          </button>
+          <button class="tab" id="tab-waterfall" onclick="switchTab('waterfall')">
+            <span class="tab-icon">💧</span>Full Waterfall
+          </button>
+        </div>
+
+        <!-- Settings -->
+        <div class="settings-row">
+          <div class="setting-group">
+            <label>Super Rate</label>
+            <input type="number" class="setting-input" id="superRate" value="12" min="0" max="30" step="0.5">
+            <span class="setting-unit">%</span>
+          </div>
+          <div class="setting-group">
+            <label>Working Days/Week</label>
+            <input type="number" class="setting-input" id="daysPerWeek" value="5" min="1" max="7">
+            <span class="setting-unit">days</span>
+          </div>
+          <div class="setting-group">
+            <label>Working Weeks/Year</label>
+            <input type="number" class="setting-input" id="weeksPerYear" value="44" min="1" max="52">
+            <span class="setting-unit">weeks</span>
+          </div>
+          <div class="setting-group">
+            <label>Payroll Margin</label>
+            <input type="number" class="setting-input" id="payrollMargin" value="52000" min="0" max="200000" step="1000">
+            <span class="setting-unit">$/yr</span>
+          </div>
+        </div>
+
+        <!-- Tab 1: Fixed Term Contract -->
+        <div class="tab-content active" id="content-ftc">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="baseSalary">Base Salary (Annual)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="baseSalary" placeholder="180000" value="180000">
+              </div>
+            </div>
+          </div>
+          <div class="info-callout">
+            <span class="callout-icon">💡</span>
+            <div><strong>How it works:</strong> Enter the base salary offered by the company. We add super, convert to day rate <code>(Total ÷ 5 ÷ 44)</code>, then calculate what your payroll company actually pays you from that day rate.</div>
+          </div>
+          <button class="btn-calculate" onclick="calculateFromFTC()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Calculate Net Weekly Pay
+          </button>
+        </div>
+
+        <!-- Tab 2: Day Rate -->
+        <div class="tab-content" id="content-dayrate">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label" for="dayRateInput">Day Rate</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="dayRateInput" placeholder="1000" value="1000">
+              </div>
+            </div>
+          </div>
+          <div class="info-callout">
+            <span class="callout-icon">💡</span>
+            <div><strong>How it works:</strong> Enter the day rate provided by the recruiter. This rate <em>includes</em> superannuation. We look up what your payroll company pays from this day rate and calculate your net weekly take-home after tax.</div>
+          </div>
+          <button class="btn-calculate" onclick="calculateFromDayRate()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Calculate Net Weekly Pay
+          </button>
+        </div>
+
+        <!-- Tab 3: Full Waterfall -->
+        <div class="tab-content" id="content-waterfall">
+          <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+            <div class="form-group">
+              <label class="form-label" for="wfDayRate">Day Rate (incl. super)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="wfDayRate" placeholder="800" value="800">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wfWorkingDays">Working Days in FY</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">#</span>
+                <input type="number" id="wfWorkingDays" placeholder="252" value="252">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wfAgentFee">Agent Fee (Annual)</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">$</span>
+                <input type="number" id="wfAgentFee" placeholder="52000" value="52000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wfOnCost">On-Cost %</label>
+              <div class="input-wrapper">
+                <span class="input-prefix">%</span>
+                <input type="number" id="wfOnCost" placeholder="30" value="30" step="0.5">
+              </div>
+            </div>
+          </div>
+          <div class="info-callout">
+            <span class="callout-icon">💡</span>
+            <div><strong>Full waterfall:</strong> Day rate × working days = annual revenue. Minus agent fee. Agent provides leave &amp; public holiday pay. On-costs (super, leave provisions, payroll tax, workers comp at 28–33% in NSW) are deducted to get your gross payslip salary. Then income tax &amp; Medicare are deducted for your <strong>net cash on hand</strong>. Shows all three on-cost scenarios.</div>
+          </div>
+          <button class="btn-calculate" onclick="calculateWaterfall()" style="background: linear-gradient(135deg, #ffa726, #ff7043);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Calculate Full Waterfall
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ QUICK SUMMARY STATS ═══ -->
+    <section class="results-section" id="quickStats">
+      <div class="quick-stats" id="statsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- ═══ RESULTS ═══ -->
+    <section class="results-section" id="results">
+      <div class="section-title">
+        <span class="icon" style="background: var(--accent-green-dim); color: var(--accent-green);">📈</span>
+        Salary Breakdown
+      </div>
+      <p class="section-subtitle">Side-by-side comparison of the company offer vs. what your payroll company actually pays you.</p>
+
+      <div class="comparison-grid">
+        <!-- Company X Card -->
+        <div class="result-card company-card animate-in animate-in-delay-1">
+          <div class="result-card-header">
+            <div class="card-icon">🏢</div>
+            <div>
+              <div class="card-title">Company Offer</div>
+              <div class="card-subtitle">What the company quotes you</div>
+            </div>
+          </div>
+          <div class="result-card-body" id="companyCardBody">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- AI Talent Card -->
+        <div class="result-card aitalent-card animate-in animate-in-delay-2">
+          <div class="result-card-header">
+            <div class="card-icon">💼</div>
+            <div>
+              <div class="card-title">AI Talent Payroll</div>
+              <div class="card-subtitle">What you actually receive</div>
+            </div>
+          </div>
+          <div class="result-card-body" id="aitalentCardBody">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Gap Card -->
+      <div class="gap-card animate-in animate-in-delay-3" id="gapCard">
+        <div class="gap-card-title">
+          ⚠️ Payroll Company Margin (The Gap)
+        </div>
+        <div class="gap-grid" id="gapGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ WATERFALL RESULTS ═══ -->
+    <section class="results-section" id="waterfallResults">
+      <div class="section-title">
+        <span class="icon" style="background: var(--accent-amber-dim); color: var(--accent-amber);">💧</span>
+        Full Money Waterfall
+      </div>
+      <p class="section-subtitle">Complete breakdown from day rate to cash on hand — showing 28%, 30%, and 33% on-cost scenarios.</p>
+
+      <!-- Waterfall Visual -->
+      <div class="card animate-in" style="margin-bottom: 24px; padding: 28px;" id="waterfallVisual">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Three on-cost scenario cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px;" id="scenarioCards">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- On-cost breakdown -->
+      <div class="card animate-in animate-in-delay-2" style="padding: 28px;" id="onCostBreakdown">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- ═══ PAY MATRIX TABLE ═══ -->
+    <section class="table-section">
+      <div class="table-header">
+        <div class="table-header-text">
+          <h2>📋 AI Talent Pay Matrix</h2>
+          <p>Complete lookup table — day rate to net weekly take-home pay. Your calculated rate is highlighted.</p>
+        </div>
+      </div>
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table id="payMatrix">
+            <thead>
+              <tr>
+                <th>Day Rate</th>
+                <th>AI Talent Salary</th>
+                <th>Super (12%)</th>
+                <th>Annual Gross</th>
+                <th>AI Talent Day Rate</th>
+                <th>Income Tax</th>
+                <th>Medicare</th>
+                <th>Net Weekly</th>
+              </tr>
+            </thead>
+            <tbody id="payMatrixBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ FOOTER ═══ -->
+    <footer class="footer">
+      <p>Australian FY 2024-25 tax rates (Stage 3 cuts) • Super at <span id="footerSuper">12</span>% • <span id="footerDays">5</span> days × <span id="footerWeeks">44</span> weeks/year</p>
+      <p style="margin-top: 6px;">This calculator is for estimation purposes only. Consult your tax professional for exact figures.</p>
+    </footer>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════════════
+       CORE DATA & CALCULATIONS
+    ═══════════════════════════════════════════ */
+
+    // Australian 2024-25 tax brackets (Stage 3 tax cuts)
+    const TAX_BRACKETS = [
+      { min: 0,      max: 18200,    rate: 0.00 },
+      { min: 18200,  max: 45000,    rate: 0.16 },
+      { min: 45000,  max: 135000,   rate: 0.30 },
+      { min: 135000, max: 190000,   rate: 0.37 },
+      { min: 190000, max: Infinity, rate: 0.45 },
+    ];
+
+    const MEDICARE_RATE = 0.02;
+
+    function getSettings() {
+      return {
+        superRate: parseFloat(document.getElementById('superRate').value) / 100 || 0.12,
+        daysPerWeek: parseInt(document.getElementById('daysPerWeek').value) || 5,
+        weeksPerYear: parseInt(document.getElementById('weeksPerYear').value) || 44,
+        margin: parseFloat(document.getElementById('payrollMargin').value) || 52000,
+      };
+    }
+
+    function calculateIncomeTax(taxableIncome) {
+      let tax = 0;
+      for (const bracket of TAX_BRACKETS) {
+        if (taxableIncome > bracket.min) {
+          const taxableInBracket = Math.min(taxableIncome, bracket.max) - bracket.min;
+          tax += taxableInBracket * bracket.rate;
+        }
+      }
+      return tax;
+    }
+
+    function calculateMedicare(taxableIncome) {
+      return taxableIncome * MEDICARE_RATE;
+    }
+
+    function calculateNetWeekly(baseSalary) {
+      const tax = calculateIncomeTax(baseSalary);
+      const medicare = calculateMedicare(baseSalary);
+      const netAnnual = baseSalary - tax - medicare;
+      const netWeekly = netAnnual / 52;
+      return { tax, medicare, netAnnual, netWeekly };
+    }
+
+    function baseSalaryToDayRate(baseSalary, settings) {
+      const total = baseSalary * (1 + settings.superRate);
+      const dayRate = total / settings.daysPerWeek / settings.weeksPerYear;
+      return { total, dayRate };
+    }
+
+    function dayRateToAITalent(dayRate, settings) {
+      const totalContractValue = dayRate * settings.daysPerWeek * settings.weeksPerYear;
+      const annualGross = totalContractValue - settings.margin;
+
+      if (annualGross <= 0) {
+        return null; // Day rate too low
+      }
+
+      const salary = annualGross / (1 + settings.superRate);
+      const superAmount = salary * settings.superRate;
+      const { tax, medicare, netAnnual, netWeekly } = calculateNetWeekly(salary);
+      const aiTalentDayRate = annualGross / settings.daysPerWeek / settings.weeksPerYear;
+
+      return {
+        totalContractValue,
+        annualGross,
+        salary,
+        superAmount,
+        tax,
+        medicare,
+        netAnnual,
+        netWeekly,
+        dayRate,
+        aiTalentDayRate,
+      };
+    }
+
+    /* ═══════════════════════════════════════════
+       FORMAT HELPERS
+    ═══════════════════════════════════════════ */
+    function fmt(val) {
+      return '$' + val.toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function fmtWhole(val) {
+      return '$' + Math.round(val).toLocaleString('en-AU');
+    }
+
+    /* ═══════════════════════════════════════════
+       TAB SWITCHING
+    ═══════════════════════════════════════════ */
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('content-' + tab).classList.add('active');
+    }
+
+    /* ═══════════════════════════════════════════
+       CALCULATION TRIGGERS
+    ═══════════════════════════════════════════ */
+    let currentDayRate = null;
+
+    function calculateFromFTC() {
+      const baseSalary = parseFloat(document.getElementById('baseSalary').value);
+      if (!baseSalary || baseSalary <= 0) {
+        alert('Please enter a valid base salary.');
+        return;
+      }
+
+      const settings = getSettings();
+      const { total, dayRate } = baseSalaryToDayRate(baseSalary, settings);
+      const aiTalent = dayRateToAITalent(dayRate, settings);
+
+      if (!aiTalent) {
+        alert('The salary is too low to calculate (payroll margin exceeds total contract value).');
+        return;
+      }
+
+      currentDayRate = dayRate;
+
+      renderCompanyCard({
+        baseSalary,
+        superAmount: baseSalary * settings.superRate,
+        totalPackage: total,
+        dayRate,
+      });
+
+      renderAITalentCard(aiTalent);
+      renderGapCard(total, aiTalent);
+      renderQuickStats(dayRate, total, aiTalent);
+      highlightTableRow(dayRate);
+
+      showResults();
+    }
+
+    function calculateFromDayRate() {
+      const dayRate = parseFloat(document.getElementById('dayRateInput').value);
+      if (!dayRate || dayRate <= 0) {
+        alert('Please enter a valid day rate.');
+        return;
+      }
+
+      const settings = getSettings();
+      const totalContractValue = dayRate * settings.daysPerWeek * settings.weeksPerYear;
+      const companyBase = totalContractValue / (1 + settings.superRate);
+      const companySuper = companyBase * settings.superRate;
+
+      const aiTalent = dayRateToAITalent(dayRate, settings);
+
+      if (!aiTalent) {
+        alert('The day rate is too low to calculate (payroll margin exceeds total contract value).');
+        return;
+      }
+
+      currentDayRate = dayRate;
+
+      renderCompanyCard({
+        baseSalary: companyBase,
+        superAmount: companySuper,
+        totalPackage: totalContractValue,
+        dayRate,
+      });
+
+      renderAITalentCard(aiTalent);
+      renderGapCard(totalContractValue, aiTalent);
+      renderQuickStats(dayRate, totalContractValue, aiTalent);
+      highlightTableRow(dayRate);
+
+      showResults();
+    }
+
+    /* ═══════════════════════════════════════════
+       RENDER FUNCTIONS
+    ═══════════════════════════════════════════ */
+    function renderCompanyCard(data) {
+      const body = document.getElementById('companyCardBody');
+      body.innerHTML = `
+        <div class="result-row">
+          <span class="result-label">Base Salary</span>
+          <span class="result-value">${fmt(data.baseSalary)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Superannuation (${(getSettings().superRate * 100).toFixed(1)}%)</span>
+          <span class="result-value">${fmt(data.superAmount)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Total Package (Annual Salary)</span>
+          <span class="result-value" style="color: var(--accent-green);">${fmt(data.totalPackage)}</span>
+        </div>
+        <div class="result-row highlight">
+          <span class="result-label">Equivalent Day Rate</span>
+          <span class="result-value">${fmt(data.dayRate)}</span>
+        </div>
+      `;
+    }
+
+    function renderAITalentCard(data) {
+      const body = document.getElementById('aitalentCardBody');
+      body.innerHTML = `
+        <div class="result-row">
+          <span class="result-label">Day Rate</span>
+          <span class="result-value">${fmt(data.dayRate)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">AI Talent Base Salary</span>
+          <span class="result-value">${fmt(data.salary)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Superannuation (${(getSettings().superRate * 100).toFixed(1)}%)</span>
+          <span class="result-value">${fmt(data.superAmount)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Annual Gross (Salary+Super)</span>
+          <span class="result-value">${fmt(data.annualGross)}</span>
+        </div>
+        <div class="result-row" style="background: var(--accent-amber-dim); margin: 0 -28px; padding: 12px 28px; border-radius: var(--radius-sm);">
+          <span class="result-label" style="color: var(--accent-amber); font-weight: 700;">AI Talent Day Rate</span>
+          <span class="result-value" style="color: var(--accent-amber); font-size: 17px;">${fmt(data.aiTalentDayRate)}</span>
+        </div>
+        <div class="result-row" style="border-top: 1px dashed var(--border-medium); margin-top: 4px; padding-top: 14px;">
+          <span class="result-label">Income Tax</span>
+          <span class="result-value" style="color: var(--accent-red);">−${fmt(data.tax)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Medicare Levy (2%)</span>
+          <span class="result-value" style="color: var(--accent-red);">−${fmt(data.medicare)}</span>
+        </div>
+        <div class="result-row">
+          <span class="result-label">Net Annual After Tax</span>
+          <span class="result-value" style="color: var(--accent-green);">${fmt(data.netAnnual)}</span>
+        </div>
+        <div class="result-row highlight-purple">
+          <span class="result-label">Net Weekly Take-Home</span>
+          <span class="result-value">${fmt(data.netWeekly)}</span>
+        </div>
+      `;
+    }
+
+    function renderGapCard(companyTotal, aiTalent) {
+      const settings = getSettings();
+      const annualDiff = companyTotal - aiTalent.annualGross;
+      const weeklyDiff = annualDiff / 52;
+      const pctDiff = ((annualDiff / companyTotal) * 100).toFixed(1);
+
+      const grid = document.getElementById('gapGrid');
+      grid.innerHTML = `
+        <div class="gap-item">
+          <div class="gap-item-label">Company Total Package</div>
+          <div class="gap-item-value" style="color: var(--accent-green);">${fmtWhole(companyTotal)}</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-label">AI Talent Gross</div>
+          <div class="gap-item-value" style="color: var(--accent-amber);">${fmtWhole(aiTalent.annualGross)}</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-label">Margin / Difference</div>
+          <div class="gap-item-value">${fmtWhole(annualDiff)}/yr</div>
+        </div>
+        <div class="gap-item">
+          <div class="gap-item-label">% of Package Lost</div>
+          <div class="gap-item-value">${pctDiff}%</div>
+        </div>
+      `;
+    }
+
+    function renderQuickStats(dayRate, companyTotal, aiTalent) {
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-label">Day Rate</div>
+          <div class="stat-value cyan">${fmt(dayRate)}</div>
+          <div class="stat-note">per working day</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Company Package</div>
+          <div class="stat-value green">${fmtWhole(companyTotal)}</div>
+          <div class="stat-note">annual incl. super</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">AI Talent Salary</div>
+          <div class="stat-value amber">${fmtWhole(aiTalent.salary)}</div>
+          <div class="stat-note">what you're paid</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Net Weekly</div>
+          <div class="stat-value purple">${fmt(aiTalent.netWeekly)}</div>
+          <div class="stat-note">take-home after tax</div>
+        </div>
+      `;
+    }
+
+    function showResults() {
+      document.getElementById('quickStats').classList.add('visible');
+      document.getElementById('results').classList.add('visible');
+
+      // Scroll to results
+      setTimeout(() => {
+        document.getElementById('quickStats').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    /* ═══════════════════════════════════════════
+       PAY MATRIX TABLE
+    ═══════════════════════════════════════════ */
+    function buildPayMatrixTable() {
+      const settings = getSettings();
+      const tbody = document.getElementById('payMatrixBody');
+      tbody.innerHTML = '';
+
+      // Generate rows for day rates from $625 to $1,500 in increments of $25
+      const dayRates = [];
+      for (let dr = 625; dr <= 1500; dr += 25) {
+        dayRates.push(dr);
+      }
+
+      // Also add specific day rates from the original table
+      const specificRates = [
+        625.89, 643.64, 650, 669.09, 683.24, 694.55, 700, 703.80, 720,
+        745.45, 770, 770.91, 774.13, 796.36, 800, 821.82, 847.27,
+        872.73, 898.18, 923.64, 949.09, 974.55, 1000, 1025.45,
+        1050.91, 1076.36, 1101.82, 1127.27, 1152.73, 1178.18,
+        1203.64, 1229.09, 1254.55
+      ];
+
+      // Merge and deduplicate, sort
+      const allRates = [...new Set([...specificRates])].sort((a, b) => a - b);
+
+      for (const dr of allRates) {
+        const data = dayRateToAITalent(dr, settings);
+        if (!data) continue;
+
+        const tr = document.createElement('tr');
+        tr.dataset.dayrate = dr;
+        tr.innerHTML = `
+          <td>${fmt(dr)}</td>
+          <td>${fmt(data.salary)}</td>
+          <td>${fmt(data.superAmount)}</td>
+          <td>${fmt(data.annualGross)}</td>
+          <td style="color: var(--accent-amber);">${fmt(data.aiTalentDayRate)}</td>
+          <td>${fmt(data.tax)}</td>
+          <td>${fmt(data.medicare)}</td>
+          <td style="font-weight: 800; color: var(--accent-green);">${fmt(data.netWeekly)}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    }
+
+    function highlightTableRow(targetDayRate) {
+      const rows = document.querySelectorAll('#payMatrixBody tr');
+      let closestRow = null;
+      let closestDiff = Infinity;
+
+      rows.forEach(row => {
+        row.classList.remove('highlighted');
+        const dr = parseFloat(row.dataset.dayrate);
+        const diff = Math.abs(dr - targetDayRate);
+        if (diff < closestDiff) {
+          closestDiff = diff;
+          closestRow = row;
+        }
+      });
+
+      if (closestRow) {
+        closestRow.classList.add('highlighted');
+        // Scroll into view within the table
+        setTimeout(() => {
+          closestRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 600);
+      }
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER SYNC
+    ═══════════════════════════════════════════ */
+    function syncFooter() {
+      const settings = getSettings();
+      document.getElementById('footerSuper').textContent = (settings.superRate * 100).toFixed(0);
+      document.getElementById('footerDays').textContent = settings.daysPerWeek;
+      document.getElementById('footerWeeks').textContent = settings.weeksPerYear;
+    }
+
+    /* ═══════════════════════════════════════════
+       SETTINGS CHANGE LISTENER
+    ═══════════════════════════════════════════ */
+    document.querySelectorAll('.setting-input').forEach(input => {
+      input.addEventListener('change', () => {
+        buildPayMatrixTable();
+        syncFooter();
+        if (currentDayRate) {
+          highlightTableRow(currentDayRate);
+        }
+      });
+    });
+
+    /* ═══════════════════════════════════════════
+       KEYBOARD SHORTCUTS
+    ═══════════════════════════════════════════ */
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const activeTab = document.querySelector('.tab.active');
+        if (activeTab.id === 'tab-ftc') {
+          calculateFromFTC();
+        } else if (activeTab.id === 'tab-dayrate') {
+          calculateFromDayRate();
+        } else if (activeTab.id === 'tab-waterfall') {
+          calculateWaterfall();
+        }
+      }
+    });
+
+    /* ═══════════════════════════════════════════
+       FULL WATERFALL CALCULATION
+    ═══════════════════════════════════════════ */
+    function calculateWaterfall() {
+      const dayRate = parseFloat(document.getElementById('wfDayRate').value);
+      const workingDays = parseInt(document.getElementById('wfWorkingDays').value);
+      const agentFee = parseFloat(document.getElementById('wfAgentFee').value);
+      const onCostPct = parseFloat(document.getElementById('wfOnCost').value);
+
+      if (!dayRate || dayRate <= 0 || !workingDays || workingDays <= 0) {
+        alert('Please enter valid values.');
+        return;
+      }
+
+      const annualRevenue = dayRate * workingDays;
+      const afterAgent = annualRevenue - agentFee;
+
+      if (afterAgent <= 0) {
+        alert('Agent fee exceeds total annual revenue. Please check your inputs.');
+        return;
+      }
+
+      // Calculate for three on-cost scenarios: 28%, 30%, 33%
+      const scenarios = [28, 30, 33].map(pct => {
+        const rate = pct / 100;
+        const gross = afterAgent / (1 + rate);
+        const onCostAmount = afterAgent - gross;
+        const superAmount = gross * 0.12; // Super is part of on-costs
+        const otherOnCosts = onCostAmount - superAmount;
+        const taxData = calculateNetWeekly(gross);
+        return {
+          pct,
+          gross,
+          onCostAmount,
+          superAmount,
+          otherOnCosts,
+          tax: taxData.tax,
+          medicare: taxData.medicare,
+          netAnnual: taxData.netAnnual,
+          netWeekly: taxData.netWeekly,
+          netFortnightly: taxData.netWeekly * 2,
+        };
+      });
+
+      // Also calculate the user's selected on-cost
+      const selectedRate = onCostPct / 100;
+      const selectedGross = afterAgent / (1 + selectedRate);
+      const selectedOnCosts = afterAgent - selectedGross;
+      const selectedTax = calculateNetWeekly(selectedGross);
+
+      renderWaterfallVisual(dayRate, workingDays, annualRevenue, agentFee, afterAgent, selectedGross, selectedOnCosts, onCostPct, selectedTax);
+      renderScenarioCards(scenarios);
+      renderOnCostBreakdown(scenarios, annualRevenue, agentFee, afterAgent);
+
+      // Show results
+      document.getElementById('waterfallResults').classList.add('visible');
+      // Hide the other results sections
+      document.getElementById('quickStats').classList.remove('visible');
+      document.getElementById('results').classList.remove('visible');
+
+      setTimeout(() => {
+        document.getElementById('waterfallResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    function renderWaterfallVisual(dayRate, workingDays, revenue, agentFee, afterAgent, gross, onCosts, onCostPct, taxData) {
+      const container = document.getElementById('waterfallVisual');
+      const maxVal = revenue;
+      const barWidth = (val) => Math.max(((val / maxVal) * 100), 8).toFixed(1);
+
+      container.innerHTML = `
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--accent-amber);">💧</span> Money Waterfall (${onCostPct}% on-cost)
+        </h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">Annual Revenue</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(revenue)}%; background: linear-gradient(90deg, #00e676, #00c853); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">${fmt(revenue)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">− Agent Fee</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(agentFee)}%; background: linear-gradient(90deg, #ff5252, #d32f2f); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">−${fmt(agentFee)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">After Agent</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(afterAgent)}%; background: linear-gradient(90deg, #ffa726, #fb8c00); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">${fmt(afterAgent)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">− On-costs (${onCostPct}%)</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(onCosts)}%; background: linear-gradient(90deg, #ff7043, #e64a19); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">−${fmt(onCosts)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">Gross Salary (payslip)</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(gross)}%; background: linear-gradient(90deg, #42a5f5, #1e88e5); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">${fmt(gross)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 150px; font-size: 12px; color: var(--text-secondary); text-align: right; flex-shrink: 0;">− Tax + Medicare</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 36px; width: ${barWidth(taxData.tax + taxData.medicare)}%; background: linear-gradient(90deg, #ab47bc, #8e24aa); border-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 14px; color: #fff; min-width: 100px;">−${fmt(taxData.tax + taxData.medicare)}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px; padding-top: 10px; border-top: 2px dashed var(--border-medium);">
+            <span style="width: 150px; font-size: 13px; color: var(--accent-green); text-align: right; flex-shrink: 0; font-weight: 700;">💰 CASH ON HAND</span>
+            <div style="flex: 1; position: relative;">
+              <div style="height: 44px; width: ${barWidth(taxData.netAnnual)}%; background: linear-gradient(90deg, #00e676, #00c853); border-radius: 8px; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; font-weight: 800; font-size: 17px; color: #fff; min-width: 140px; box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);">${fmt(taxData.netAnnual)}</div>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 16px; margin-top: 20px; flex-wrap: wrap;">
+          <div style="background: var(--accent-green-dim); border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 140px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Net Weekly</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-green); margin-top: 4px;">${fmt(taxData.netWeekly)}</div>
+          </div>
+          <div style="background: var(--accent-green-dim); border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 140px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Net Fortnightly</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-green); margin-top: 4px;">${fmt(taxData.netWeekly * 2)}</div>
+          </div>
+          <div style="background: var(--accent-cyan-dim); border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 140px; text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Super to Fund</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--accent-cyan); margin-top: 4px;">${fmt(gross * 0.12)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderScenarioCards(scenarios) {
+      const container = document.getElementById('scenarioCards');
+      container.innerHTML = scenarios.map((s, i) => {
+        const colors = ['var(--accent-cyan)', 'var(--accent-amber)', 'var(--accent-purple)'];
+        const bgs = ['var(--accent-cyan-dim)', 'var(--accent-amber-dim)', 'var(--accent-purple-dim)'];
+        const labels = ['Low (28%)', 'Mid (30%)', 'High (33%)'];
+        return `
+          <div class="result-card animate-in" style="border-top: 3px solid ${colors[i]};">
+            <div class="result-card-header">
+              <div class="card-icon" style="background: ${bgs[i]}; color: ${colors[i]};">${s.pct}%</div>
+              <div>
+                <div class="card-title">On-Cost ${labels[i]}</div>
+                <div class="card-subtitle">Super + Leave + Payroll Tax + WC</div>
+              </div>
+            </div>
+            <div class="result-card-body">
+              <div class="result-row">
+                <span class="result-label">Gross Salary (payslip)</span>
+                <span class="result-value">${fmt(s.gross)}</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">On-cost Total</span>
+                <span class="result-value" style="color: var(--accent-amber);">−${fmt(s.onCostAmount)}</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">↳ Super (12% → fund)</span>
+                <span class="result-value" style="font-size: 13px;">${fmt(s.superAmount)}</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">↳ Leave, payroll tax, WC</span>
+                <span class="result-value" style="font-size: 13px;">${fmt(s.otherOnCosts)}</span>
+              </div>
+              <div class="result-row" style="border-top: 1px dashed var(--border-medium); margin-top: 4px; padding-top: 12px;">
+                <span class="result-label">Income Tax</span>
+                <span class="result-value" style="color: var(--accent-red);">−${fmt(s.tax)}</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Medicare Levy</span>
+                <span class="result-value" style="color: var(--accent-red);">−${fmt(s.medicare)}</span>
+              </div>
+              <div class="result-row">
+                <span class="result-label">Net Annual</span>
+                <span class="result-value" style="color: var(--accent-green); font-size: 16px;">${fmt(s.netAnnual)}</span>
+              </div>
+              <div class="result-row" style="background: ${bgs[i]}; margin: 0 -28px; padding: 14px 28px; border-radius: 8px; border-bottom: none;">
+                <span class="result-label" style="color: ${colors[i]}; font-weight: 700; font-size: 14px;">Net Weekly</span>
+                <span class="result-value" style="color: ${colors[i]}; font-size: 20px;">${fmt(s.netWeekly)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderOnCostBreakdown(scenarios, revenue, agentFee, afterAgent) {
+      const container = document.getElementById('onCostBreakdown');
+      container.innerHTML = `
+        <h3 style="font-size: 1rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--accent-cyan);">📊</span> Scenario Comparison Table
+        </h3>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums;">
+            <thead>
+              <tr>
+                <th style="padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-medium);">Item</th>
+                <th style="padding: 12px 16px; text-align: right; font-size: 11px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 0.8px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-medium);">28% On-cost</th>
+                <th style="padding: 12px 16px; text-align: right; font-size: 11px; font-weight: 700; color: var(--accent-amber); text-transform: uppercase; letter-spacing: 0.8px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-medium);">30% On-cost</th>
+                <th style="padding: 12px 16px; text-align: right; font-size: 11px; font-weight: 700; color: var(--accent-purple); text-transform: uppercase; letter-spacing: 0.8px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border-medium);">33% On-cost</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">Annual Revenue</td>
+                ${scenarios.map(() => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px;">${fmt(revenue)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">Agent Fee</td>
+                ${scenarios.map(() => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px; color: var(--accent-red);">−${fmt(agentFee)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">After Agent</td>
+                ${scenarios.map(() => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px;">${fmt(afterAgent)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">On-costs</td>
+                ${scenarios.map(s => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px; color: var(--accent-red);">−${fmt(s.onCostAmount)}</td>`).join('')}</tr>
+              <tr style="background: rgba(255,255,255,0.02);"><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-primary); font-size: 13px; font-weight: 700;">Gross Salary</td>
+                ${scenarios.map(s => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 700; font-size: 14px;">${fmt(s.gross)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">↳ Super to Fund</td>
+                ${scenarios.map(s => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 500; font-size: 13px; color: var(--text-muted);">${fmt(s.superAmount)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">Income Tax</td>
+                ${scenarios.map(s => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px; color: var(--accent-red);">−${fmt(s.tax)}</td>`).join('')}</tr>
+              <tr><td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); font-size: 13px;">Medicare</td>
+                ${scenarios.map(s => `<td style="padding: 10px 16px; border-bottom: 1px solid var(--border-subtle); text-align: right; font-weight: 600; font-size: 14px; color: var(--accent-red);">−${fmt(s.medicare)}</td>`).join('')}</tr>
+              <tr style="background: rgba(0, 230, 118, 0.06);"><td style="padding: 14px 16px; color: var(--accent-green); font-size: 14px; font-weight: 800; border-bottom: 1px solid var(--border-subtle);">💰 Net Annual</td>
+                ${scenarios.map(s => `<td style="padding: 14px 16px; text-align: right; font-weight: 800; font-size: 16px; color: var(--accent-green); border-bottom: 1px solid var(--border-subtle);">${fmt(s.netAnnual)}</td>`).join('')}</tr>
+              <tr style="background: rgba(0, 230, 118, 0.06);"><td style="padding: 14px 16px; color: var(--accent-green); font-size: 14px; font-weight: 800;">💰 Net Weekly</td>
+                ${scenarios.map(s => `<td style="padding: 14px 16px; text-align: right; font-weight: 800; font-size: 16px; color: var(--accent-green);">${fmt(s.netWeekly)}</td>`).join('')}</tr>
+              <tr style="background: rgba(0, 230, 118, 0.03);"><td style="padding: 12px 16px; color: var(--text-secondary); font-size: 13px; font-weight: 600;">Net Fortnightly</td>
+                ${scenarios.map(s => `<td style="padding: 12px 16px; text-align: right; font-weight: 700; font-size: 14px; color: var(--accent-green);">${fmt(s.netFortnightly)}</td>`).join('')}</tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    /* ═══════════════════════════════════════════
+       INIT
+    ═══════════════════════════════════════════ */
+    buildPayMatrixTable();
+    syncFooter();
+  </script>
+</body>
+</html>
